@@ -141,9 +141,46 @@ const getAllUserscryptography = async (req, res) => {
   }
 };
 
+const getUserByIdcryptography = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+    });
+
+    const encryptedData = {
+      id: user.id,
+      createdAt: user.createdAt,
+      email: await cryptography.encrypt({
+        data: user.email,
+      }),
+      name: await cryptography.encrypt({
+        data: user.name,
+      }),
+    };
+
+    const decryptedUsers = {
+      id: encryptedData.id,
+      createdAt: encryptedData.createdAt,
+      email: await cryptography.decrypt({
+        data: encryptedData.email,
+      }),
+      name: await cryptography.decrypt({
+        data: encryptedData.name,
+      }),
+    };
+
+    return res
+      .status(200)
+      .json({ encdata: encryptedData, decdata: decryptedUsers });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getUsersjson,
   getAllUserscrypto,
   getAllUsersbcrypt,
+  getUserByIdcryptography,
   getAllUserscryptography,
 };
